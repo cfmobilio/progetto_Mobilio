@@ -1,0 +1,36 @@
+Primo piatto:
+Pasta al pomodoro
+Risotto ai funghi
+Spaghetti alla carbonara
+Lasagna al forno
+Gnocchi al pesto
+Minestrone di verdure
+Couscous alla mediterranea
+Tortellini in brodo
+Zuppa di cipolle
+Riso alla cantonese
+
+Secondo piatto:
+Bistecca ai ferri
+Filetto di salmone
+Pollo arrosto
+Salsicce alla griglia
+Hamburger con patatine
+Vitello tonnato
+Brasato di manzo
+Anatra all'arancia
+Tonno alla griglia
+Maiale allo zenzero
+
+Contorno:
+Insalata mista
+Patate al forno
+Verdure grigliate
+Caponata siciliana
+Pomodori al basilico
+Fagioli all'olio
+Insalata di riso
+Funghi trifolati
+Couscous alle verdure
+Cetrioli in agrodolce
+
