@@ -1,6 +1,5 @@
 import os
 import pickle
-import logging
 
 
 class Scorte:
@@ -13,9 +12,6 @@ class Scorte:
         if os.path.isfile(nome_file):
             with open(nome_file, 'rb') as f:
                 self.scorte = pickle.load(f)
-            logging.debug(f"Loaded scorte from file: {self.scorte}")
-        else:
-            logging.debug(f"File {nome_file} does not exist. No scorte loaded.")
 
     # Salva le scorte su file
     def salva_scorte(self, nome_file="scorte.pickle"):

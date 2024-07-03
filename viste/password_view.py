@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QPushButton, QLineEdit, QMessageBox
+import re
 
 
 class PasswordDimenticataDialog(QDialog):
@@ -21,11 +22,20 @@ class PasswordDimenticataDialog(QDialog):
         self.setLayout(layout)
 
     def invia_richiesta(self):
-        email = self.email_input.text()
+        email = self.email_input.text().strip()
         if not email:
             QMessageBox.warning(self, 'Errore', 'Inserisci un indirizzo email')
+            return
+
+        if not self.valida_email(email):
+            QMessageBox.warning(self, 'Errore', 'Inserisci un indirizzo email valido')
             return
 
         risultato = self.sistema_mensa.richiedi_reimpostazione_password(email)
         QMessageBox.information(self, 'Richiesta inviata', risultato)
         self.accept()
+
+    def valida_email(self, email):
+        # Usare un semplice regex per controllare la validità dell'email
+        regex = r'^\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        return re.match(regex, email) is not None

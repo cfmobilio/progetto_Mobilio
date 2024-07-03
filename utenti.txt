@@ -1,0 +1,2 @@
+Studente,Mario,Rossi,mario.rossi@studenti.universita.it,Password1?,123456,0
+Amministratore,Luigi,Bianchi,luigi.bianchi@universita.it,Admin2!

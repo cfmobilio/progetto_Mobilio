@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QMessageBox
-
-from viste.studente_view import StudenteView
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QListWidget, QMessageBox
+from datetime import datetime
+from funzionalità.menù import Menu
 
 
 class MenuView(QWidget):
@@ -10,49 +11,30 @@ class MenuView(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        self.setWindowTitle('Menù del Giorno')
         layout = QVBoxLayout()
 
-        self.menu_label = QLabel('Menu del giorno:')
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                font-weight: normal;
+                color: black;
+            }
+            QListWidget {
+                font-size: 16px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+        """)
+
+        current_date = datetime.now().strftime('%d-%m-%Y')
+        self.menu_label = QLabel(f'Menù del giorno {current_date}:')
         layout.addWidget(self.menu_label)
 
+        # Lista per visualizzare i piatti del menu
         self.menu_list = QListWidget()
         layout.addWidget(self.menu_list)
 
         self.setLayout(layout)
-        self.update_menu()  # Sposta qui la chiamata per mantenere pulita la funzione init_ui
-
-    def update_menu(self):
-        try:
-            with open("menu.txt", "r") as file:
-                menu_lines = file.readlines()
-        except FileNotFoundError:
-            QMessageBox.critical(self, "Errore", "Il file menu.txt non è stato trovato.")
-            return
-        except Exception as e:
-            QMessageBox.critical(self, "Errore", f"Si è verificato un errore: {str(e)}")
-            return
-
-        self.menu_list.clear()
-        pasto_type = None
-        count_per_type = {'primo': 0, 'secondo': 0, 'contorno': 0}
-        for line in menu_lines:
-            if line.startswith("Primo piatto:"):
-                pasto_type = "primo"
-                count_per_type['primo'] = 0
-                self.menu_list.addItem("Primo piatto:")
-            elif line.startswith("Secondo piatto:"):
-                pasto_type = "secondo"
-                count_per_type['secondo'] = 0
-                self.menu_list.addItem("Secondo piatto:")
-            elif line.startswith("Contorno:"):
-                pasto_type = "contorno"
-                count_per_type['contorno'] = 0
-                self.menu_list.addItem("Contorno:")
-            elif line.strip() and count_per_type[pasto_type] < 2:
-                # Mostriamo solo le prime due opzioni per ogni tipo di portata
-                self.menu_list.addItem(line.strip())
-                count_per_type[pasto_type] += 1
-
-    def show_studente_view(self, studente):
-        self.studente_view = StudenteView(studente, self.sistema_mensa)
-        self.studente_view.show()
+        Menu.update_menu(self)

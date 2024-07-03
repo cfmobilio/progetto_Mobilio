@@ -1,69 +1,49 @@
-from utenti.utente import Utente
+from utenti.utente import Utente  # Assumo che Utente sia definito in utenti/utente.py
+from funzionalità.menù import Menu
+from funzionalità.prenotazione import Prenotazione
 
 
 class Amministratore(Utente):
-
     def __init__(self, id, nome, cognome, email, password):
         super().__init__(id, nome, cognome, email, password)
-        self.menu = []
+        self.menu = Menu()  # Utilizza la classe Menu per gestire il menu
         self.scorte = {}
         self.prenotazioni = []
         self.abbonamenti = []
 
-    def gestisci_menu(self, nuovo_menu):
-        # Logica per gestire il menu
-        self.menu = nuovo_menu
-        return "Menu aggiornato"
-
-    def aggiorna_scorte(self, ingrediente, quantita):
-        # Logica per aggiornare le scorte
+    def aggiorna_scorte(self, ingrediente, quantita, unita):
         if ingrediente in self.scorte:
-            self.scorte[ingrediente] += quantita
+            self.scorte[ingrediente]['quantita'] += quantita
         else:
-            self.scorte[ingrediente] = quantita
-        return f"Scorte di {ingrediente} aggiornate a {self.scorte[ingrediente]}"
+            self.scorte[ingrediente] = {'quantita': quantita, 'unita': unita}
+        return f"Scorte di {ingrediente} aggiornate a {self.scorte[ingrediente]['quantita']} {unita}"
+
+    def gestisci_menu(self, nuovo_menu):
+        for pasto in nuovo_menu:
+            self.menu.aggiungi_pasto(pasto)
+        return f"Menu aggiornato con {len(nuovo_menu)} piatti."
 
     def visualizza_report(self):
-        # Logica per generare e visualizzare report generico
-        report = {
+        return {
             "prenotazioni_totali": len(self.prenotazioni),
-            "scorte": self.scorte,
-            "abbonamenti_attivi": len([abb for abb in self.abbonamenti if not abb.verifica_scaduto()])
+            "scorte": self.visualizza_report_scorte(),
+            "abbonamenti_attivi": self.visualizza_report_abbonamenti()
         }
-        return report
 
     def visualizza_report_prenotazioni(self):
-        prenotazioni_totali = len(self.prenotazioni)
-        return {
-            "prenotazioni_totali": prenotazioni_totali
-        }
+        return {"prenotazioni_totali": len(self.prenotazioni)}
 
     def visualizza_report_scorte(self):
-        scorte = self.scorte
-        return {
-            "scorte": scorte
-        }
+        return {ingrediente: f"{dati['quantita']} {dati['unita']}" for ingrediente, dati in self.scorte.items()}
 
-    # Metodo per visualizzare i report
     def visualizza_report_abbonamenti(self):
-        abbonamenti_attivi = len([abb for abb in self.abbonamenti if not abb.verifica_scaduto()])
-        return {
-            "abbonamenti_attivi": abbonamenti_attivi
-        }
+        return {"abbonamenti_attivi": len([abb for abb in self.abbonamenti if not abb.verifica_scaduto()])}
 
-    # Metodo per inviare le notifiche a chi specificato
     def invia_notifiche(self, messaggio, destinatari):
         for destinatario in destinatari:
             destinatario.ricevi_notifica(messaggio)
-        # Salva il messaggio nel file delle notifiche
         with open("notifiche.txt", "a") as file:
             file.write(f"{messaggio}\n")
 
-    # Metodo per ottenere informazioni sull'amministratore
     def get_info(self):
-        return {
-            "id": self.id,
-            "nome": self.nome,
-            "cognome": self.cognome,
-            "email": self.email
-        }
+        return {"id": self.id, "nome": self.nome, "cognome": self.cognome, "email": self.email}

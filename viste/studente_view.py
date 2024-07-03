@@ -1,6 +1,12 @@
-import logging
-
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QMessageBox, QVBoxLayout, QListWidget
+from PyQt5.QtWidgets import (QWidget, QLabel, QPushButton, QMessageBox, QVBoxLayout, QGridLayout, QListWidget,
+                             QSpacerItem, QSizePolicy)
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
+from viste.menu_view import MenuView
+from viste.prenotazione_view import PrenotazioneView
+from viste.pagamento_view import PagamentoView
+from viste.abbonamento_view import AbbonamentoView
+from viste.notifiche_view import NotificheView
 
 
 class StudenteView(QWidget):
@@ -11,106 +17,107 @@ class StudenteView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout()
+        self.setWindowTitle('MangiAmo')
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                font-weight: bold;
+                color: black;
+            }
+            QPushButton {
+                font-size: 16px;
+                padding: 10px 20px;
+                background-color: white;
+                color: black;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                min-width: 200px;
+                min-height: 40px;
+                text-align: left;
+                padding-left: 30px;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+            }
+        """)
 
-        self.benvenuto_label = QLabel(f"Benvenuto, {self.studente.get_info()['nome']}")
-        layout.addWidget(self.benvenuto_label)
+        self.layout = QGridLayout()
 
-        self.visualizza_menu_button = QPushButton('Visualizza Menu')
+        self.layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding), 0, 0, 1, 2)
+
+        self.benvenuto_label = QLabel(f"Bentornato, {self.studente.get_info()['nome']}")
+        self.layout.addWidget(self.benvenuto_label, 1, 0, 1, 2, alignment=Qt.AlignCenter)
+
+        self.visualizza_menu_button = QPushButton('Menu')
+
         self.visualizza_menu_button.clicked.connect(self.visualizza_menu)
-        layout.addWidget(self.visualizza_menu_button)
+        self.layout.addWidget(self.visualizza_menu_button, 2, 0, alignment=Qt.AlignCenter)
 
-        self.prenota_pasto_button = QPushButton('Prenota Pasto')
+        self.prenota_pasto_button = QPushButton('Prenotazione')
         self.prenota_pasto_button.clicked.connect(self.prenota_pasto)
-        layout.addWidget(self.prenota_pasto_button)
+        self.layout.addWidget(self.prenota_pasto_button, 3, 0, alignment=Qt.AlignCenter)
 
-        self.effettua_pagamento_button = QPushButton('Effettua Pagamento')
+        self.effettua_pagamento_button = QPushButton('Pagamento')
         self.effettua_pagamento_button.clicked.connect(self.effettua_pagamento)
-        layout.addWidget(self.effettua_pagamento_button)
+        self.layout.addWidget(self.effettua_pagamento_button, 4, 0, alignment=Qt.AlignCenter)
 
-        self.visualizza_notifiche_button = QPushButton('Visualizza Notifiche')
+        self.visualizza_notifiche_button = QPushButton('Notifiche')
         self.visualizza_notifiche_button.clicked.connect(self.visualizza_notifiche)
-        layout.addWidget(self.visualizza_notifiche_button)
+        self.layout.addWidget(self.visualizza_notifiche_button, 5, 0, alignment=Qt.AlignCenter)
 
-        self.sottoscrivi_abbonamento_button = QPushButton('Sottoscrivi Abbonamento')
+        self.sottoscrivi_abbonamento_button = QPushButton('Abbonamento')
         self.sottoscrivi_abbonamento_button.clicked.connect(self.sottoscrivi_abbonamento)
-        layout.addWidget(self.sottoscrivi_abbonamento_button)
+        self.layout.addWidget(self.sottoscrivi_abbonamento_button, 6, 0, alignment=Qt.AlignCenter)
 
-        self.logout_button = QPushButton("Logout")
+        self.logout_button = QPushButton('Logout')
         self.logout_button.clicked.connect(self.logout)
-        layout.addWidget(self.logout_button)
+        self.layout.addWidget(self.logout_button, 7, 0, alignment=Qt.AlignCenter)
 
-        self.setLayout(layout)
+        self.layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding), 8, 0, 1, 2)
+
+        self.setLayout(self.layout)
 
     def visualizza_menu(self):
         try:
-            from viste.menu_view import MenuView  # Importazione ritardata per evitare importazione circolare
-            self.menu_view = MenuView(self.sistema_mensa, self)  # Creazione di un'istanza di MenuView
-            self.layout().addWidget(self.menu_view)  # Aggiungi MenuView al layout corrente
-            self.menu_view.show()  # Mostra MenuView
-        except ImportError as e:
-            logging.error(f"Errore durante l'importazione di MenuView: {e}")
+            self.menu_view = MenuView(self.sistema_mensa, self)
+            self.layout.addWidget(self.menu_view, 2, 1, 5, 1)
+            self.menu_view.show()
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+    def aggiorna_studente(self, studente):
+        self.studente = studente
+        self.benvenuto_label.setText(f"Bentornato, {self.studente.get_info()['nome']}")
 
     def prenota_pasto(self):
         try:
-            from viste.prenotazione_view import PrenotazioneView
-            # Importazione ritardata per evitare importazione circolare
             self.prenotazione_view = PrenotazioneView(self.studente, self.sistema_mensa)
             self.prenotazione_view.show()
-        except ImportError as e:
-            logging.error(f"Errore durante l'importazione di PrenotazioneView: {e}")
+        except ImportError:
+            pass
 
     def effettua_pagamento(self):
         try:
-            from viste.pagamento_view import PagamentoView
             self.pagamento_view = PagamentoView(self.studente, self.sistema_mensa)
             self.pagamento_view.show()
-        except ImportError as e:
-            logging.error(f"Errore durante l'importazione di PagamentoView: {e}")
-
-    def submit_pagamento(self):
-        importo = float(self.importo_input.text())
-        risultato = self.studente.effettua_pagamento(importo)
-        QMessageBox.information(self, "Pagamento", risultato)
-        self.pagamento_window.close()
+        except ImportError:
+            pass
 
     def visualizza_notifiche(self):
-        self.notifiche_window = QWidget()
-        self.notifiche_window.setWindowTitle("Notifiche")
-        layout = QVBoxLayout()
-
-        self.notifiche_list = QListWidget()
-        layout.addWidget(self.notifiche_list)
-
-        self.update_notifiche()  # Aggiorna le notifiche solo dopo aver creato la lista delle notifiche
-
-        self.notifiche_window.setLayout(layout)
-        self.notifiche_window.show()
-
-    def update_notifiche(self):
         try:
-            notifiche = self.sistema_mensa.notifiche.get_notifiche()
-            self.notifiche_list.clear()
-            for notifica in notifiche:
-                self.notifiche_list.addItem(notifica)
-        except AttributeError as e:
-            logging.error(f"Errore durante l'aggiornamento delle notifiche: {e}")
-        except Exception as e:
-            logging.error(f"Errore generico durante l'aggiornamento delle notifiche: {e}")
+            self.notifica_view = NotificheView(self.studente, self.sistema_mensa)
+            self.notifica_view.show()
+        except ImportError:
+            pass
 
     def sottoscrivi_abbonamento(self):
         try:
-            from viste.abbonamento_view import AbbonamentoView
             self.abbonamento_view = AbbonamentoView(self.studente, self.sistema_mensa)
             self.abbonamento_view.show()
-        except ImportError as e:
-            logging.error(f"Errore durante l'importazione di AbbonamentoView: {e}")
-
-    def submit_abbonamento(self):
-        abbonamento = self.abbonamento_input.text()
-        risultato = self.studente.sottoscrivi_abbonamento(abbonamento)
-        QMessageBox.information(self, "Abbonamento", risultato)
-        self.abbonamento_window.close()
+        except ImportError:
+            pass
 
     def logout(self):
         reply = QMessageBox.question(self, 'Logout', 'Sei sicuro di voler uscire?',
@@ -118,4 +125,4 @@ class StudenteView(QWidget):
 
         if reply == QMessageBox.Yes:
             QMessageBox.information(self, "Logout", "Sei stato disconnesso.")
-            self.close()  # Close the main window import os
+            self.parentWidget().setCurrentIndex(0)

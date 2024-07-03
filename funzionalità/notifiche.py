@@ -16,5 +16,14 @@ class Notifiche:
         with open("notifiche.txt", "a") as file:
             file.write(f"{messaggio}\n")
 
+    def update_notifiche(self):
+        self.notifiche_list.clear()
+        try:
+            notifiche = self.sistema_mensa.notifiche.get_notifiche()
+            for line in notifiche:
+                self.notifiche_list.addItem(line.strip())
+        except Exception:
+            pass
+
     def get_notifiche(self):
         return self.notifiche

@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFormLayout, QMessageBox, QHBoxLayout
+from funzionalità.pagamento import Pagamento
 
 
 class PagamentoView(QWidget):
@@ -9,28 +10,62 @@ class PagamentoView(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        self.setStyleSheet("""
+        QLabel {
+            font-size: 20px;
+            font-weight: normal;
+            color: black;
+        }
+        QPushButton {
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #FF0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            min-width: 150px;
+            min-height: 40px;
+        }
+        QPushButton:hover {
+            background-color: #c0392b;
+        }
+        """)
+        self.setWindowTitle('MangiAmo')
         layout = QVBoxLayout()
 
         self.pagamento_label = QLabel('Pagamenti')
         layout.addWidget(self.pagamento_label)
 
-        self.saldo_label = QLabel('Saldo borsellino virtuale: € 7,00')
+        self.saldo_label = QLabel(f"Saldo borsellino virtuale: {self.studente.get_info()['borsellino']:.2f} €")
         layout.addWidget(self.saldo_label)
 
         form_layout = QFormLayout()
 
-        self.nome_input = QLineEdit()
-        self.cognome_input = QLineEdit()
-        self.numero_carta_input = QLineEdit()
-        self.mese_scadenza_input = QLineEdit()
-        self.anno_scadenza_input = QLineEdit()
-        self.cvv_input = QLineEdit()
-
+        self.nome_input = QLineEdit(self.studente.nome)
+        self.nome_input.setReadOnly(True)
         form_layout.addRow("Nome:", self.nome_input)
+
+        self.cognome_input = QLineEdit(self.studente.cognome)
+        self.cognome_input.setReadOnly(True)
         form_layout.addRow("Cognome:", self.cognome_input)
+
+        self.anno_mese_layout = QHBoxLayout()
+        self.mese_scadenza_input = QLineEdit()
+        self.mese_scadenza_input.setPlaceholderText("MM")
+        self.mese_scadenza_input.setMaximumWidth(50)
+        self.anno_mese_layout.addWidget(self.mese_scadenza_input)
+
+        self.anno_scadenza_input = QLineEdit()
+        self.anno_scadenza_input.setPlaceholderText("YYYY")
+        self.anno_scadenza_input.setMaximumWidth(70)
+        self.anno_mese_layout.addWidget(self.anno_scadenza_input)
+
+        form_layout.addRow("Scadenza carta:", self.anno_mese_layout)
+
+        self.numero_carta_input = QLineEdit()
         form_layout.addRow("Numero carta:", self.numero_carta_input)
-        form_layout.addRow("Mese scadenza:", self.mese_scadenza_input)
-        form_layout.addRow("Anno scadenza:", self.anno_scadenza_input)
+
+        self.cvv_input = QLineEdit()
         form_layout.addRow("CVV:", self.cvv_input)
 
         self.importo_input = QLineEdit()
@@ -47,7 +82,7 @@ class PagamentoView(QWidget):
         layout.addLayout(self.importo_buttons_layout)
 
         self.paga_button = QPushButton('Paga')
-        self.paga_button.clicked.connect(self.effettua_pagamento)
+        self.paga_button.clicked.connect(self.process_payment)
         layout.addWidget(self.paga_button)
 
         self.setLayout(layout)
@@ -55,28 +90,17 @@ class PagamentoView(QWidget):
     def set_importo(self, importo):
         self.importo_input.setText(importo.replace("€", "").replace(",", "."))
 
-    def effettua_pagamento(self):
-        nome = self.nome_input.text()
-        cognome = self.cognome_input.text()
-        numero_carta = self.numero_carta_input.text()
-        mese_scadenza = self.mese_scadenza_input.text()
-        anno_scadenza = self.anno_scadenza_input.text()
-        cvv = self.cvv_input.text()
-        importo = self.importo_input.text()
-
-        # Logica per effettuare il pagamento
-        if self.validate_inputs(nome, cognome, numero_carta, mese_scadenza, anno_scadenza, cvv, importo):
-            risultato = self.studente.effettua_pagamento(float(importo))
-            QMessageBox.information(self, "Pagamento", risultato)
-        else:
-            QMessageBox.warning(self, "Errore", "Per favore, completa tutti i campi correttamente.")
-
-    def validate_inputs(self, nome, cognome, numero_carta, mese_scadenza, anno_scadenza, cvv, importo):
-        if (not nome or not cognome or not numero_carta or not mese_scadenza or not anno_scadenza
-                or not cvv or not importo):
-            return False
-        try:
-            float(importo)
-        except ValueError:
-            return False
-        return True
+    def process_payment(self):
+        pagamento = Pagamento(
+            self.nome_input.text(),
+            self.cognome_input.text(),
+            self.numero_carta_input.text(),
+            self.mese_scadenza_input.text(),
+            self.anno_scadenza_input.text(),
+            self.cvv_input.text(),
+            self.importo_input.text(),
+            self.studente,
+            self.sistema_mensa,
+            self
+        )
+        pagamento.effettua_pagamento()

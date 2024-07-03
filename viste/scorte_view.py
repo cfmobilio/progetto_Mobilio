@@ -1,5 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget
-import logging
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QPushButton, QComboBox,
+    QMessageBox, QFormLayout, QLineEdit
+)
+from funzionalità.scorte import Scorte
 
 
 class ScorteView(QWidget):
@@ -10,23 +13,62 @@ class ScorteView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        layout = QVBoxLayout()
+        self.setStyleSheet("""
+        QLabel {
+            font-size: 20px;
+            font-weight: normal;
+            color: black;
+        }
+        QPushButton {
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #FF0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            min-width: 150px;
+            min-height: 40px;
+        }
+        QPushButton:hover {
+            background-color: #c0392b;
+        }
+        """)
 
-        self.scorte_label = QLabel('Scorte disponibili:')
-        layout.addWidget(self.scorte_label)
+        self.setWindowTitle("Aggiorna Scorte")
 
-        self.scorte_list = QListWidget()
-        self.update_scorte()
-        layout.addWidget(self.scorte_list)
+        layout = QVBoxLayout(self)
+        form_layout = QFormLayout()
 
-        self.setLayout(layout)
+        self.ingrediente_input = QLineEdit()
+        form_layout.addRow("Ingrediente:", self.ingrediente_input)
 
-    def update_scorte(self):
-        scorte = self.sistema_mensa.get_scorte()  # Questo dovrebbe restituire una lista di scorte
-        logging.debug(f"Scorte data: {scorte}")
-        self.scorte_list.clear()
-        for scorta in scorte:
-            try:
-                self.scorte_list.addItem(f"{scorta['ingrediente']} - {scorta['quantita']} unità")
-            except KeyError as e:
-                logging.error(f"KeyError: {e} in scorta: {scorta}")
+        self.quantita_input = QLineEdit()
+        form_layout.addRow("Quantità:", self.quantita_input)
+
+        self.unita_input = QComboBox()
+        self.unita_input.addItems(["kg", "litri", "g", "ml", "unità"])
+        form_layout.addRow("Unità di Misura:", self.unita_input)
+
+        self.submit_scorte_button = QPushButton("Aggiorna Scorte")
+        self.submit_scorte_button.clicked.connect(self.submit_scorte)
+        form_layout.addRow("", self.submit_scorte_button)
+
+        layout.addLayout(form_layout)
+
+    def submit_scorte(self):
+        ingrediente = self.ingrediente_input.text()
+        quantita = self.quantita_input.text()
+
+        try:
+            quantita = float(quantita)
+            unita = self.unita_input.currentText()
+
+            risultato = self.amministratore.aggiorna_scorte(ingrediente, quantita, unita)
+            QMessageBox.information(self, "Scorte", risultato)
+            self.close()
+
+        except ValueError:
+            QMessageBox.warning(self, "Errore", "La quantità deve essere un numero.")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Errore", f"Si è verificato un errore: {e}")

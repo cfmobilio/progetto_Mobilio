@@ -1,144 +1,110 @@
-import os
-import pickle
 import unittest
+from unittest.mock import MagicMock, patch, mock_open
 from datetime import datetime, timedelta
+import pickle
+import os
+from io import BytesIO
+import sys
+# Import delle classi dal tuo progetto
+from funzionalità.pagamento import Pagamento
 from funzionalità.abbonamento import Abbonamento
 from funzionalità.menù import Menu
 from funzionalità.notifiche import Notifiche
 from funzionalità.pagamento import Pagamento
-from funzionalità.pasto import Pasto
 from funzionalità.prenotazione import Prenotazione
 from funzionalità.scorte import Scorte
-from utenti.amministratore import Amministratore
-from utenti.utente import Utente
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 
-class TestAbbonamento(unittest.TestCase):
+class TestSistemaMensa(unittest.TestCase):
 
-    def setUp(self):
-        # Create the directory if it doesn't exist
-        if not os.path.exists('Dati'):
-            os.makedirs('Dati')
+    # Test per la classe Abbonamento
+    @patch('funzionalità.abbonamento.pickle.load')
+    @patch('funzionalità.abbonamento.open', new_callable=mock_open, read_data=pickle.dumps([]))
+    def test_carica_abbonamenti_salvati(self, mock_open, mock_pickle_load):
+        mock_pickle_load.return_value = []
+        abbonamenti = Abbonamento.carica_abbonamenti_salvati()
+        self.assertIsInstance(abbonamenti, list)
 
-        # Initialize the abbonamento instance
-        self.abbonamento = Abbonamento("123", datetime.now(), datetime.now(), datetime.now() + timedelta(days=30), True)
-
-        # Ensure the file is empty for a fresh start
-        with open('Dati/abbonamenti.pickle', 'wb') as f:
-            pickle.dump([], f)
-
-    def tearDown(self):
-        # Clean up the directory after tests
-        if os.path.exists('Dati/abbonamenti.pickle'):
-            os.remove('Dati/abbonamenti.pickle')
-        if os.path.exists('Dati'):
-            os.rmdir('Dati')
+    @patch('funzionalità.abbonamento.pickle.dump')
+    @patch('funzionalità.abbonamento.open', new_callable=mock_open)
+    def test_salva_abbonamenti(self, mock_open, mock_pickle_dump):
+        Abbonamento.salva_abbonamenti([])
+        mock_pickle_dump.assert_called_once_with([], mock_open().__enter__())
 
     def test_aggiungi_abbonamento(self):
-        self.abbonamento.aggiungi_abbonamento("123", datetime.now(),
-                                              datetime.now(), datetime.now() + timedelta(days=30), True)
-        abbonamenti = self.abbonamento.carica_abbonamenti_salvati()
-        self.assertEqual(len(abbonamenti), 1)
-        self.assertEqual(abbonamenti[0]["codice"], "123")
+        abbonamento = Abbonamento()
+        data_inizio = datetime.now()
+        data_scadenza = data_inizio + timedelta(days=30)
+        abbonamento.aggiungi_abbonamento("codice123", data_inizio, data_inizio, data_scadenza)
+        self.assertEqual(abbonamento.codice, "codice123")
+        self.assertEqual(abbonamento.data_inizio, data_inizio)
+        self.assertEqual(abbonamento.data_rilascio, data_inizio)
+        self.assertEqual(abbonamento.data_scadenza, data_scadenza)
 
     def test_verifica_scaduto(self):
-        self.assertFalse(self.abbonamento.verifica_scaduto())
-        abbonamento_scaduto = Abbonamento("124", datetime.now() - timedelta(days=60),
-                                          datetime.now() - timedelta(days=60),
-                                          datetime.now() - timedelta(days=30), True)
-        self.assertTrue(abbonamento_scaduto.verifica_scaduto())
-
-
-class TestMenu(unittest.TestCase):
-
-    def setUp(self):
-        self.menu = Menu()
-        self.menu.menu = []  # Resetta il menu per ogni test
+        abbonamento = Abbonamento(data_scadenza=datetime.now() - timedelta(days=1))
+        self.assertTrue(abbonamento.verifica_scaduto())
 
     def test_aggiungi_pasto(self):
-        pasto = {"categoria": "Primi", "nome": "Spaghetti"}
-        self.menu.aggiungi_pasto(pasto)
-        self.assertIn(pasto, self.menu.get_menu_items())
+        menu = Menu()
+        pasto = {'categoria': 'Categoria1', 'nome': 'Pasto1'}
+        menu.aggiungi_pasto(pasto)
+        self.assertIn(pasto, menu.menu)
 
-    def test_carica_menu_da_file(self):
-        with open("menu.txt", "w") as f:
-            f.write("Primi:\nSpaghetti\n")
-        self.menu.carica_menu_da_file("menu.txt")
-        self.assertEqual(len(self.menu.get_menu_items()), 1)
-        self.assertEqual(self.menu.get_menu_items()[0]['nome'], "Spaghetti")
-        os.remove("menu.txt")
-
-
-class TestNotifiche(unittest.TestCase):
-
-    def setUp(self):
-        self.notifiche = Notifiche()
+    # Test per la classe Notifiche
+    @patch('funzionalità.notifiche.open', new_callable=mock_open, read_data="Notifica1\nNotifica2\n")
+    def test_carica_notifiche_da_file(self, mock_open):
+        notifiche = Notifiche()
+        notifiche.carica_notifiche_da_file()
+        self.assertEqual(len(notifiche.get_notifiche()), 2)
 
     def test_aggiungi_notifica(self):
-        self.notifiche.aggiungi_notifica("Nuova notifica")
-        self.assertIn("Nuova notifica", self.notifiche.get_notifiche())
+        notifiche = Notifiche()
+        notifiche.aggiungi_notifica("Nuova Notifica")
+        self.assertIn("Nuova Notifica", notifiche.get_notifiche())
 
-
-class TestPagamento(unittest.TestCase):
-
+    # Test per la classe Pagamento
     def setUp(self):
-        self.pagamento = Pagamento(1, 101, 50, "carta")
+        self.studente_mock = MagicMock()
+        self.sistema_mensa_mock = MagicMock()
+        self.view_mock = MagicMock()
+        self.pagamento = Pagamento(
+            "Mario", "Rossi", "1234567812345678", "12", "2024", "123",
+            10, self.studente_mock, self.sistema_mensa_mock, self.view_mock
+        )
 
-    def test_get_info(self):
-        info = self.pagamento.get_info()
-        self.assertEqual(info["id"], 1)
-        self.assertEqual(info["importo"], 50)
+    def test_valida_carta_credito(self):
+        self.assertTrue(self.pagamento.valida_carta_credito())
 
+    def test_valida_data_scadenza(self):
+        self.assertTrue(self.pagamento.valida_data_scadenza())
 
-class TestPasto(unittest.TestCase):
+    def test_valida_cvv(self):
+        self.assertTrue(self.pagamento.valida_cvv())
 
-    def setUp(self):
-        self.pasto = Pasto(1, "Pizza", "Pizza Margherita", 8.50)
+    # Test per la classe Prenotazione
+    def test_prenotazione_get_info(self):
+        self.studente_mock = MagicMock()
+        pasto = "Pasta"
+        prenotazione = Prenotazione(self.studente_mock, pasto)
+        info = prenotazione.get_info()
+        self.assertEqual(info['pasto'], "Pasta")
 
-    def test_get_info(self):
-        info = self.pasto.get_info()
-        self.assertEqual(info["nome"], "Pizza")
-        self.assertEqual(info["prezzo"], 8.50)
-
-
-class TestPrenotazione(unittest.TestCase):
-
-    def setUp(self):
-        self.studente = Utente(1, "Mario", "Rossi", "mario.rossi@example.com", "password")
-        self.pasto = Pasto(1, "Pizza", "Pizza Margherita", 8.50)
-        self.prenotazione = Prenotazione(self.studente, self.pasto)
-
-    def test_get_info(self):
-        info = self.prenotazione.get_info()
-        self.assertEqual(info["pasto"]["nome"], "Pizza")
-        self.assertEqual(info["studente"]["nome"], "Mario")
-
-
-class TestScorte(unittest.TestCase):
-
-    def setUp(self):
-        self.scorte = Scorte()
+    # Test per la classe Scorte
+    @patch('funzionalità.scorte.open', new_callable=mock_open)
+    @patch('funzionalità.scorte.pickle.load')
+    def test_carica_scorte_da_file(self, mock_pickle_load, mock_open):
+        mock_pickle_load.return_value = []
+        scorte = Scorte()
+        with patch('builtins.open', new_callable=lambda: mock_open(read_data=BytesIO(pickle.dumps([])).getvalue())):
+            scorte.carica_scorte_da_file()
+        self.assertIsInstance(scorte.get_scorte(), list)
 
     def test_aggiungi_scorta(self):
-        self.scorte.aggiungi_scorta("Pomodoro", 10)
-        self.assertIn({"ingrediente": "Pomodoro", "quantita": 10}, self.scorte.get_scorte())
-
-
-class TestAmministratore(unittest.TestCase):
-
-    def setUp(self):
-        self.amministratore = Amministratore(1, "Luca", "Bianchi", "luca.bianchi@example.com", "password")
-
-    def test_gestisci_menu(self):
-        nuovo_menu = [{"categoria": "Primi", "nome": "Pasta"}]
-        result = self.amministratore.gestisci_menu(nuovo_menu)
-        self.assertEqual(result, "Menu aggiornato")
-        self.assertEqual(self.amministratore.menu, nuovo_menu)
-
-    def test_aggiorna_scorte(self):
-        result = self.amministratore.aggiorna_scorte("Pomodoro", 10)
-        self.assertEqual(result, "Scorte di Pomodoro aggiornate a 10")
-        self.assertEqual(self.amministratore.scorte["Pomodoro"], 10)
+        scorte = Scorte()
+        scorte.aggiungi_scorta("Ingrediente1", 10)
+        self.assertIn({'ingrediente': 'Ingrediente1', 'quantita': 10}, scorte.get_scorte())
 
 
 if __name__ == '__main__':

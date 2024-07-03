@@ -1,8 +1,6 @@
-import logging
 import threading
 import schedule
 import time
-from datetime import datetime
 
 
 class GestoreBackup:
@@ -19,7 +17,6 @@ class GestoreBackup:
             time.sleep(1)
 
     def effettua_backup(self):
-        logging.info(f"Inizio del backup alle {datetime.now()}")
         success = all([
             self.copia_dati_abbonamento(),
             self.copia_dati_prenotazione(),
@@ -30,9 +27,9 @@ class GestoreBackup:
             self.copia_dati_scorte()
         ])
         if success:
-            logging.info("Backup completato con successo.")
+            print("Backup completato con successo.")
         else:
-            logging.error("Backup fallito.")
+            print("Backup fallito.")
 
     def copia_dati_abbonamento(self):
         try:
@@ -42,7 +39,7 @@ class GestoreBackup:
                     file.write(f"{abbonamento}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati degli abbonamenti: {e}")
+            print(f"Errore nel copiare i dati degli abbonamenti: {e}")
             return False
 
     def copia_dati_prenotazione(self):
@@ -53,7 +50,7 @@ class GestoreBackup:
                     file.write(f"{prenotazione}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati delle prenotazioni: {e}")
+            print(f"Errore nel copiare i dati delle prenotazioni: {e}")
             return False
 
     def copia_dati_menu(self):
@@ -64,7 +61,7 @@ class GestoreBackup:
                     file.write(f"{elemento}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati dei menu: {e}")
+            print(f"Errore nel copiare i dati dei menu: {e}")
             return False
 
     def copia_dati_notifiche(self):
@@ -75,7 +72,7 @@ class GestoreBackup:
                     file.write(f"{notifica}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati delle notifiche: {e}")
+            print(f"Errore nel copiare i dati delle notifiche: {e}")
             return False
 
     def copia_dati_pagamenti(self):
@@ -86,7 +83,7 @@ class GestoreBackup:
                     file.write(f"{pagamento}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati dei pagamenti: {e}")
+            print(f"Errore nel copiare i dati dei pagamenti: {e}")
             return False
 
     def copia_dati_pasti(self):
@@ -97,7 +94,7 @@ class GestoreBackup:
                     file.write(f"{pasto}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati dei pasti: {e}")
+            print(f"Errore nel copiare i dati dei pasti: {e}")
             return False
 
     def copia_dati_scorte(self):
@@ -108,5 +105,5 @@ class GestoreBackup:
                     file.write(f"{scorta}\n")
             return True
         except Exception as e:
-            logging.error(f"Errore nel copiare i dati delle scorte: {e}")
+            print(f"Errore nel copiare i dati delle scorte: {e}")
             return False

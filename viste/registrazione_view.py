@@ -1,7 +1,7 @@
-import logging
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox
-from PyQt5.QtCore import pyqtSignal
-
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QMessageBox
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QPixmap
+import re
 from utenti.amministratore import Amministratore
 from utenti.studente import Studente
 
@@ -13,8 +13,38 @@ class RegistrazioneView(QWidget):
         super().__init__(parent)
         self.sistema_mensa = sistema_mensa
         self.init_ui()
+        self.is_registered = False  # Flag to prevent double registration
 
     def init_ui(self):
+        self.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+            }
+            QLineEdit {
+                font-size: 16px;
+                padding: 10px;
+                border: 2px solid #ccc;
+                border-radius: 5px;
+            }
+            QPushButton {
+                font-size: 16px;
+                padding: 10px;
+                background-color: #FF0000;
+                color: white;
+                border: none;
+                border-radius: 5px;
+            }
+            QPushButton#forgot_password {
+                background-color: transparent;
+                color: #e74c3c;
+                text-align: left;
+            }
+                """)
+
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignCenter)
+
+        self.setWindowTitle('MangiAmo')
         layout = QVBoxLayout()
 
         self.nome_label = QLabel('Nome:')
@@ -53,9 +83,25 @@ class RegistrazioneView(QWidget):
         self.registra_button.clicked.connect(self.registra)
         layout.addWidget(self.registra_button)
 
+        self.torna_button = QPushButton('Torna indietro')
+        self.torna_button.clicked.connect(self.torna_indietro)
+        layout.addWidget(self.torna_button)
+
         self.setLayout(layout)
 
+    def valida_email(self, email):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        return re.match(pattern, email)
+
+    def valida_password(self, password):
+        pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
+        return re.match(pattern, password)
+
     def registra(self):
+        if self.is_registered:
+            self.mostra_messaggio("Errore", "Registrazione già effettuata")
+            return
+
         nome = self.nome_input.text()
         cognome = self.cognome_input.text()
         email = self.email_input.text()
@@ -63,33 +109,47 @@ class RegistrazioneView(QWidget):
         tipo_utente = self.tipo_utente_combobox.currentText()
         numero_matricola = self.matricola_input.text() if tipo_utente == 'Studente' else None
 
-        logging.debug(f"Registrazione tentata: {nome} {cognome} ({email}), Tipo: {tipo_utente}")
-
         if not nome or not cognome or not email or not password:
-            logging.warning("Errore di registrazione: campi non completi")
-            return "Errore: tutti i campi sono obbligatori"
+            self.mostra_messaggio("Errore", "Tutti i campi sono obbligatori")
+            return
+
+        if not self.valida_email(email):
+            self.mostra_messaggio("Errore", "Formato email non valido")
+            return
+
+        if not self.valida_password(password):
+            self.mostra_messaggio("Errore",
+                                  "La password deve contenere almeno 8 caratteri, "
+                                  "un numero, una lettera maiuscola e un carattere speciale")
+            return
 
         if self.sistema_mensa.esiste_utente(email):
-            logging.warning(f"Errore di registrazione: utente già esistente per email {email}")
-            return "Errore: l'utente esiste già"
+            self.mostra_messaggio("Errore", "L'utente esiste già")
+            return
 
         try:
             if tipo_utente == 'Studente':
-                logging.debug("Creazione di un nuovo studente")
                 nuovo_utente = Studente(id=None, nome=nome, cognome=cognome, email=email,
                                         password=password, numero_matricola=numero_matricola)
                 self.sistema_mensa.registra_studente(nuovo_utente)
             elif tipo_utente == 'Amministratore':
-                logging.debug("Creazione di un nuovo amministratore")
                 nuovo_utente = Amministratore(id=None, nome=nome, cognome=cognome, email=email, password=password)
                 self.sistema_mensa.registra_amministratore(nuovo_utente)
             else:
-                logging.warning(f"Errore di registrazione: tipo utente non valido {tipo_utente}")
-                return "Errore: tipo utente non valido"
+                self.mostra_messaggio("Errore", "Tipo utente non valido")
+                return
 
-            logging.debug(f"Registrazione completata per {tipo_utente} {nome} {cognome} ({email})")
+            self.mostra_messaggio("Successo", "Registrazione completata con successo")
             self.registrazione_completata.emit()
-            return "Registrazione completata con successo"
+            self.is_registered = True
         except Exception as e:
-            logging.error(f"Errore durante la registrazione: {e}")
-            return "Errore durante la registrazione"
+            self.mostra_messaggio("Errore", f"Errore durante la registrazione: {e}")
+
+    def mostra_messaggio(self, titolo, messaggio):
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle(titolo)
+        msg_box.setText(messaggio)
+        msg_box.exec_()
+
+    def torna_indietro(self):
+        self.parentWidget().setCurrentIndex(0)
