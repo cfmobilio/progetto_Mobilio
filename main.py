@@ -10,8 +10,8 @@ if __name__ == "__main__":
 
 # credenziali per l'accesso ai profili di prova
 # studente
-# email : mario.rossi@studenti.universita.it
+# email : mario.rossi@studenti.univpm.it
 # password : Password1?
 # amministratore
-# email : luigi.bianchi@universita.it
+# email : luigi.bianchi@univpm.it
 # password : Admin2!

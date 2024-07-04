@@ -1,2 +1,2 @@
-Studente,Mario,Rossi,mario.rossi@studenti.universita.it,Password1?,123456,0
-Amministratore,Luigi,Bianchi,luigi.bianchi@universita.it,Admin2!
+Studente,Mario,Rossi,mario.rossi@studenti.univpm.it,Password1?,123456,0
+Amministratore,Luigi,Bianchi,luigi.bianchi@univpm.it,Admin2!

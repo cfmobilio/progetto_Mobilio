@@ -40,11 +40,11 @@ class HomeView(QMainWindow):
         self.stacked_widget.addWidget(self.registrazione_view)
 
         # Example student and administrator registration
-        studente = Studente(id=1, nome="Mario", cognome="Rossi", email="mario.rossi@studenti.universita.it",
+        studente = Studente(id=1, nome="Mario", cognome="Rossi", email="mario.rossi@studenti.univpm.it",
                             password="Password1?", numero_matricola="123456")
         self.sistema_mensa.registra_studente(studente)
 
-        amministratore = Amministratore(id=2, nome="Luigi", cognome="Bianchi", email="luigi.bianchi@universita.it",
+        amministratore = Amministratore(id=2, nome="Luigi", cognome="Bianchi", email="luigi.bianchi@univpm.it",
                                         password="Admin2!")
         self.sistema_mensa.registra_amministratore(amministratore)
 

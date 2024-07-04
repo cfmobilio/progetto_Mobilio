@@ -1,5 +1,5 @@
+import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox, QComboBox
-
 
 class ReportViewer(QWidget):
     def __init__(self, amministratore):
@@ -45,24 +45,25 @@ class ReportViewer(QWidget):
         self.setLayout(layout)
 
     def mostra_report(self):
-        global report_text
         tipo_report = self.tipo_report_combo.currentText()
 
-        if tipo_report == "Report Prenotazioni":
-            report = self.amministratore.visualizza_report_prenotazioni()
-            report_text = f"Prenotazioni Totali: {report['prenotazioni_totali']}\n"
-        elif tipo_report == "Report Scorte":
-            report = self.amministratore.visualizza_report_scorte()
+        try:
+            if tipo_report == "Report Prenotazioni":
+                report = self.amministratore.visualizza_report_prenotazioni()
+                report_text = f"Prenotazioni Totali: {report['prenotazioni_totali']}\n"
+            elif tipo_report == "Report Scorte":
+                report = self.amministratore.visualizza_report_scorte()
 
-            if not report['scorte']:
-                QMessageBox.information(self, "Report", "Non ci sono scorte disponibili.")
-                return
-            scorte_text = "\n".join(
-                [f"{ingrediente}: {quantita}" for ingrediente, quantita in report['scorte'].items()])
-            report_text = f"Scorte:\n{scorte_text}\n"
+                if 'scorte' not in report or not report['scorte']:
+                    QMessageBox.information(self, "Report", "Non ci sono scorte disponibili.")
+                    return
+                scorte_text = "\n".join(
+                    [f"{ingrediente}: {quantita}" for ingrediente, quantita in report['scorte'].items()])
+                report_text = f"Scorte:\n{scorte_text}\n"
+            elif tipo_report == "Report Abbonamenti":
+                report = self.amministratore.visualizza_report_abbonamenti()
+                report_text = f"Abbonamenti Attivi: {report['abbonamenti_attivi']}"
 
-        elif tipo_report == "Report Abbonamenti":
-            report = self.amministratore.visualizza_report_abbonamenti()
-            report_text = f"Abbonamenti Attivi: {report['abbonamenti_attivi']}"
-
-        QMessageBox.information(self, "Report", report_text)
+            QMessageBox.information(self, "Report", report_text)
+        except Exception as e:
+            QMessageBox.critical(self, "Errore", f"Errore durante la visualizzazione del report: {e}")

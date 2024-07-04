@@ -72,6 +72,7 @@ class RegistrazioneView(QWidget):
         layout.addWidget(self.tipo_utente_label)
         self.tipo_utente_combobox = QComboBox()
         self.tipo_utente_combobox.addItems(["Studente", "Amministratore"])
+        self.tipo_utente_combobox.currentIndexChanged.connect(self.aggiorna_campo_matricola)
         layout.addWidget(self.tipo_utente_combobox)
 
         self.matricola_label = QLabel('Numero Matricola:')
@@ -88,6 +89,16 @@ class RegistrazioneView(QWidget):
         layout.addWidget(self.torna_button)
 
         self.setLayout(layout)
+        self.aggiorna_campo_matricola()
+
+    def aggiorna_campo_matricola(self):
+        tipo_utente = self.tipo_utente_combobox.currentText()
+        if tipo_utente == 'Studente':
+            self.matricola_label.show()
+            self.matricola_input.show()
+        else:
+            self.matricola_label.hide()
+            self.matricola_input.hide()
 
     def valida_email(self, email):
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
