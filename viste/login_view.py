@@ -1,5 +1,5 @@
 import re
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLineEdit, QPushButton, QLabel, QMessageBox
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QLineEdit, QPushButton, QLabel, QMessageBox, QHBoxLayout
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QPixmap
 from utenti.amministratore import Amministratore
@@ -44,16 +44,35 @@ class LoginView(QWidget):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
 
-        # Email field
+        self.logo_image_label = QLabel(self)
+        pixmap = QPixmap('icone/logo.png')
+        scaled_pixmap = pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.logo_image_label.setPixmap(scaled_pixmap)
+        self.logo_image_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.logo_image_label)
+
+        # Email field with icon
+        email_layout = QHBoxLayout()
+        email_icon_label = QLabel()
+        email_icon_label.setPixmap(
+            QPixmap('icone/user.png').scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        email_layout.addWidget(email_icon_label)
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("Email")
-        layout.addWidget(self.email_input)
+        email_layout.addWidget(self.email_input)
+        layout.addLayout(email_layout)
 
-        # Password field
+        # Password field with icon
+        password_layout = QHBoxLayout()
+        password_icon_label = QLabel()
+        password_icon_label.setPixmap(
+            QPixmap('icone/password.png').scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        password_layout.addWidget(password_icon_label)
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QLineEdit.Password)
-        layout.addWidget(self.password_input)
+        password_layout.addWidget(self.password_input)
+        layout.addLayout(password_layout)
 
         # Forgot password button
         self.passwordim_button = QPushButton('Password dimenticata?', self)

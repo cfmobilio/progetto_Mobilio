@@ -36,15 +36,16 @@ class WelcomeView(QWidget):
 
         layout = QVBoxLayout()
 
-        # Spaziatore per centrare verticalmente il logo
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.logo_label = QLabel(f'MangiAmo')
-        self.logo_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.logo_label)
+        # Aggiungi il QLabel per il logo
+        self.logo_image_label = QLabel(self)
+        pixmap = QPixmap('icone/logo.png')
+        scaled_pixmap = pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.logo_image_label.setPixmap(scaled_pixmap)
+        self.logo_image_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.logo_image_label)
 
-
-        # Spaziatore per centrare verticalmente i pulsanti
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.login_button = QPushButton('Login')

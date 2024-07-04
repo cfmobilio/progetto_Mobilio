@@ -49,24 +49,29 @@ class AmministratoreView(QWidget):
         self.layout.addWidget(self.benvenuto_label, 1, 0, 1, 2, alignment=Qt.AlignCenter)
 
         self.gestisci_menu_button = QPushButton('Modifica Menu')
+        self.gestisci_menu_button.setIcon(QIcon('icone/up.png'))
         self.gestisci_menu_button.clicked.connect(self.show_menu_manager)
         self.layout.addWidget(self.gestisci_menu_button)
 
         self.aggiorna_scorte_button = QPushButton('Aggiorna Scorte')
+        self.aggiorna_scorte_button.setIcon(QIcon('icone/org.png'))
         self.aggiorna_scorte_button.clicked.connect(self.aggiorna_scorte)
         self.layout.addWidget(self.aggiorna_scorte_button)
 
         self.visualizza_report_button = QPushButton('Visualizza Report')
+        self.visualizza_report_button.setIcon(QIcon('icone/report.png'))
         self.visualizza_report_button.clicked.connect(self.show_report_viewer)
         self.layout.addWidget(self.visualizza_report_button)
 
         self.invia_notifiche_button = QPushButton('Invia Notifiche')
+        self.invia_notifiche_button.setIcon(QIcon('icone/bell.png'))
         self.invia_notifiche_button.clicked.connect(self.invia_notifiche)
         self.layout.addWidget(self.invia_notifiche_button)
 
         self.logout_button = QPushButton('Logout')
+        self.logout_button.setIcon(QIcon('icone/logout.png'))
         self.logout_button.clicked.connect(self.logout)
-        self.layout.addWidget(self.logout_button, 7, 0, alignment=Qt.AlignCenter)
+        self.layout.addWidget(self.logout_button)
 
         self.layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding), 8, 0, 1, 2)
 

@@ -49,27 +49,32 @@ class StudenteView(QWidget):
         self.layout.addWidget(self.benvenuto_label, 1, 0, 1, 2, alignment=Qt.AlignCenter)
 
         self.visualizza_menu_button = QPushButton('Menu')
-
+        self.visualizza_menu_button.setIcon(QIcon('icone/menu.png'))
         self.visualizza_menu_button.clicked.connect(self.visualizza_menu)
         self.layout.addWidget(self.visualizza_menu_button, 2, 0, alignment=Qt.AlignCenter)
 
         self.prenota_pasto_button = QPushButton('Prenotazione')
         self.prenota_pasto_button.clicked.connect(self.prenota_pasto)
+        self.prenota_pasto_button.setIcon(QIcon('icone/booking.png'))
         self.layout.addWidget(self.prenota_pasto_button, 3, 0, alignment=Qt.AlignCenter)
 
         self.effettua_pagamento_button = QPushButton('Pagamento')
+        self.effettua_pagamento_button.setIcon(QIcon('icone/credit-card.png'))
         self.effettua_pagamento_button.clicked.connect(self.effettua_pagamento)
         self.layout.addWidget(self.effettua_pagamento_button, 4, 0, alignment=Qt.AlignCenter)
 
         self.visualizza_notifiche_button = QPushButton('Notifiche')
+        self.visualizza_notifiche_button.setIcon(QIcon('icone/bell.png'))
         self.visualizza_notifiche_button.clicked.connect(self.visualizza_notifiche)
         self.layout.addWidget(self.visualizza_notifiche_button, 5, 0, alignment=Qt.AlignCenter)
 
         self.sottoscrivi_abbonamento_button = QPushButton('Abbonamento')
+        self.sottoscrivi_abbonamento_button.setIcon(QIcon('icone/abb.png'))
         self.sottoscrivi_abbonamento_button.clicked.connect(self.sottoscrivi_abbonamento)
         self.layout.addWidget(self.sottoscrivi_abbonamento_button, 6, 0, alignment=Qt.AlignCenter)
 
         self.logout_button = QPushButton('Logout')
+        self.logout_button.setIcon(QIcon('icone/logout.png'))
         self.logout_button.clicked.connect(self.logout)
         self.layout.addWidget(self.logout_button, 7, 0, alignment=Qt.AlignCenter)
 

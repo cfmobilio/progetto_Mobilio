@@ -13,7 +13,7 @@ class RegistrazioneView(QWidget):
         super().__init__(parent)
         self.sistema_mensa = sistema_mensa
         self.init_ui()
-        self.is_registered = False  # Flag to prevent double registration
+        self.is_registered = False
 
     def init_ui(self):
         self.setStyleSheet("""
